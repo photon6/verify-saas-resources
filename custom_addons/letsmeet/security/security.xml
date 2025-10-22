@@ -1,0 +1,5 @@
+<record id="group_letsmeet_delegate" model="res.groups">
+    <field name="name">Delegated Scheduler</field>
+    <field name="category_id" ref="base.module_category_productivity" />
+</record>
+``
