@@ -2,3 +2,8 @@
 	path = photon6/propensic
 	url = git@github.com:photon6/propensic.git
 	branch = main
+
+[submodule "photon6/propensic"]
+	path = photon6/propensic
+	url = git@github.com:photon6/propensic.git
+	branch = main-1
