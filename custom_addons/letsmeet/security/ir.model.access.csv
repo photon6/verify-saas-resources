@@ -1,6 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_calendar_event_public,access_calendar_event_public,model_calendar_event,base.group_public,1,0,0,0
-access_calendar_event_user,access_calendar_event_user,model_calendar_event,base.group_user,1,1,1,1
-access_letsmeet_slot_user,access_letsmeet_slot_user,model_letsmeet_slot,base.group_user,1,1,1,1
-access_letsmeet_slot_public,access_letsmeet_slot_public,model_letsmeet_slot,base.group_public,1,0,0,0
-access_letsmeet_slot_delegate,access_letsmeet_slot_delegate,model_letsmeet_slot,module_name.group_letsmeet_delegate,1,1,0,0
