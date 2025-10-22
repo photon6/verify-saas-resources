@@ -2,4 +2,3 @@
     <field name="name">Delegated Scheduler</field>
     <field name="category_id" ref="base.module_category_productivity" />
 </record>
-``
