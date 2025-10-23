@@ -7,8 +7,3 @@
 	path = photon6/propensic/quasy
 	url = git@github.com:photon6/propensic.git/quasy
 	branch = main
-
-[submodule "photon6/propensic"]
-	path = photon6/propensic
-	url = git@github.com:photon6/propensic.git
-	branch = main-1
