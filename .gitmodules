@@ -1,9 +1,0 @@
-[submodule "letsmeet"]
-	path = photon6/propensic/letsmeet
-	url = git@github.com:photon6/propensic.git/letsmeet
-	branch = main
-
-[submodule "quasy"]
-	path = photon6/propensic/quasy
-	url = git@github.com:photon6/propensic.git/quasy
-	branch = main
