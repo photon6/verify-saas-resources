@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" exporter="Camunda Modeler" exporterVersion="5.0.0" id="_FXeIoKhnEeOC4LOKh_69JQ" targetNamespace="isv_customtasks" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:isv="http://ibm.com/bpmn/isv" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+	<bpmn2:process camunda:historyTimeToLive="1" id="csr_delegated_pw_reset_single_page" isExecutable="true" isv:propertiesSchemaVersion="4.0" name="csr_delegated_pw_reset_single_page">
+		<bpmn2:startEvent camunda:displayName="Start" id="Event_0onayf9">
+			<bpmn2:outgoing>Flow_1_Event_0onayf9_to_isv_function_1770345515549_customId</bpmn2:outgoing>
+		</bpmn2:startEvent>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.CustomRuleTask" id="isv_function_1770345515549_customId" name="Set Vars">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:inputParameter id="inputData" name="inputData">statements:
+- return: &gt;
+        {
+            "thirdPartyIdentitySource": "rkhanna.ice.ibmcloud.com",
+            "admin_api_client_id": "19f96598-f1d4-4742-a357-214f48bfaa93",
+            "admin_api_client_secret": "Pz6FBhmTvq"
+        }</isv:inputParameter>
+					<isv:outputParameter id="json" name="JSON"/>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_1_Event_0onayf9_to_isv_function_1770345515549_customId</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_2_isv_function_1770345515549_customId_to_isv_page_1770345539140_customId</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.RenderHTMLTask" id="isv_page_1770345539140_customId" name="CSR Password Reset">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:inputParameter id="templatename" name="templateName">custom_page1</isv:inputParameter>
+					<isv:inputParameter id="themeId" name="themeId">36a1e4e3-8500-4048-b64a-c149908aec18</isv:inputParameter>
+					<isv:inputParameter id="callback" name="callback"/>
+					<isv:inputParameter id="signal" name="signal"/>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_2_isv_function_1770345515549_customId_to_isv_page_1770345539140_customId</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_3_isv_page_1770345539140_customId_to_Event_0ehrbpw_customId</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:endEvent camunda:displayName="End" id="Event_0ehrbpw_customId">
+			<bpmn2:incoming>Flow_3_isv_page_1770345539140_customId_to_Event_0ehrbpw_customId</bpmn2:incoming>
+		</bpmn2:endEvent>
+		<bpmn2:sequenceFlow id="Flow_1_Event_0onayf9_to_isv_function_1770345515549_customId" sourceRef="Event_0onayf9" targetRef="isv_function_1770345515549_customId"/>
+		<bpmn2:sequenceFlow id="Flow_2_isv_function_1770345515549_customId_to_isv_page_1770345539140_customId" sourceRef="isv_function_1770345515549_customId" targetRef="isv_page_1770345539140_customId"/>
+		<bpmn2:sequenceFlow id="Flow_3_isv_page_1770345539140_customId_to_Event_0ehrbpw_customId" sourceRef="isv_page_1770345539140_customId" targetRef="Event_0ehrbpw_customId"/>
+	</bpmn2:process>
+	<bpmndi:BPMNDiagram id="BPMNDiagram_5bf6329d">
+		<bpmndi:BPMNPlane bpmnElement="csr_delegated_pw_reset_single_page" id="BPMNPlane_b1352f75">
+			<bpmndi:BPMNShape bpmnElement="Event_0onayf9" id="Event_0onayf9_di">
+				<dc:Bounds height="36.0" width="126.0" x="300.0" y="80.0"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="isv_function_1770345515549_customId" id="isv_function_1770345515549_customId_di">
+				<dc:Bounds height="76.0" width="188.0" x="269.0" y="205.0"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="isv_page_1770345539140_customId" id="isv_page_1770345539140_customId_di">
+				<dc:Bounds height="76.0" width="188.0" x="269.0" y="368.0"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="Event_0ehrbpw_customId" id="Event_0ehrbpw_customId_di">
+				<dc:Bounds height="36.0" width="126.0" x="300.0" y="549.0"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNEdge bpmnElement="Flow_1_Event_0onayf9_to_isv_function_1770345515549_customId" id="Flow_1_Event_0onayf9_to_isv_function_1770345515549_customId_di">
+				<di:waypoint x="363.0" y="118.0"/>
+				<di:waypoint x="363.0" y="205.0"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_2_isv_function_1770345515549_customId_to_isv_page_1770345539140_customId" id="Flow_2_isv_function_1770345515549_customId_to_isv_page_1770345539140_customId_di">
+				<di:waypoint x="363.0" y="281.0"/>
+				<di:waypoint x="363.0" y="368.0"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_3_isv_page_1770345539140_customId_to_Event_0ehrbpw_customId" id="Flow_3_isv_page_1770345539140_customId_to_Event_0ehrbpw_customId_di">
+				<di:waypoint x="363.0" y="444.0"/>
+				<di:waypoint x="363.0" y="547.0"/>
+			</bpmndi:BPMNEdge>
+		</bpmndi:BPMNPlane>
+	</bpmndi:BPMNDiagram>
+</bpmn2:definitions>

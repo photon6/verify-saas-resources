@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="usc/favicon.ico" />
+    <link rel="stylesheet" href="usc/css/stateless.css" />
+    <!-- Carbon components -->
+    <link rel="stylesheet" href="/profile/static/carbon-components.min.css" />
+    <!-- Theme override -->
+    <link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+
+    <title>Help Desk – Password Reset</title>
+
+    <style>
+        .cs-content {
+            max-width: 520px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .instruction, .policy-box {
+            background: #f0f4ff;
+            border-left: 4px solid #0f62fe;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 2px;
+        }
+        .policy-box ul {
+            margin: 0.5rem 0 0 1.5rem;
+            padding-left: 0;
+            list-style-type: disc;
+        }
+        .error-message {
+            color: #da1e28;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .password-group {
+            margin: 1.5rem 0;
+        }
+        .button {
+            width: 100%;
+            padding: 0.875rem;
+            font-size: 1rem;
+        }
+        .ul-plain { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; }
+        .ul-plain li { margin-bottom: 0.25rem; }
+        #password-requirements-static ul.ul-plain li::before { content: "\2639\00a0"; }
+        /* Result panels (success / error) */
+        #result-success, #result-error, #result-success-actions { display: none; margin-top: 1.5rem; }
+        #result-success.show, #result-error.show, #result-success-actions.show { display: block; }
+        #result-success-actions { margin-top: 0; padding-top: 1rem; }
+        .result-success-box {
+            background: #defbe6;
+            border-left: 4px solid #198038;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 2px;
+        }
+        .result-success-actions { margin-top: 1.25rem; }
+        .result-success-actions .btn { margin-right: 0.75rem; margin-bottom: 0.5rem; padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; border-radius: 2px; border: 1px solid transparent; }
+        .result-success-actions .btn-primary { background: #0f62fe; color: #fff; border-color: #0f62fe; }
+        .result-success-actions .btn-primary:hover { opacity: 0.9; }
+        .result-success-actions .btn-secondary { background: transparent; color: #0f62fe; border-color: #0f62fe; }
+        .result-success-actions .btn-secondary:hover { opacity: 0.9; }
+        .cs-all-error .content { padding: 1rem 1.5rem; }
+        .error-header.spaced { font-weight: 600; margin-bottom: 0.5rem; }
+        .error-message.spaced { color: #da1e28; }
+        .result-error-box {
+            background: #fff1f1;
+            border-left: 4px solid #da1e28;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 2px;
+        }
+        .result-error-box .error-details { margin-top: 1rem; font-size: 0.875rem; color: #525252; }
+        .result-error-box .spaced { margin-bottom: 0.5rem; }
+        /* Password policy block: red background, sad face ☹ (U+2639) as bullet */
+        .error-policy-block { background: #f8d7da; padding: 1rem 1.25rem; margin-top: 1rem; border-radius: 4px; border: 1px solid #f5c6cb; }
+        .error-policy-block .error-policy-list { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; }
+        .error-policy-block .error-policy-list li { margin-bottom: 0.25rem; }
+        .error-policy-block .error-policy-list li::before { content: "\2639\00a0"; }
+    </style>
+</head>
+<body>
+
+    <!-- Config from workflow context (server replaces @context.*@ when rendering) -->
+    <script>
+        window.PW_RESET_CONFIG = {
+            thirdPartyIdP: "@context.thirdPartyIdentitySource@",
+            adminApiClientId: "@context.admin_api_client_id@",
+            adminApiClientSecret: "@context.admin_api_client_secret@"
+        };
+    </script>
+
+    <div class="cs-content login">
+
+        @PAGE_HEADER@
+
+        <h1>MyAccount Password Reset Application</h1>
+
+        <p>Please choose option and argument</p>
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <select name="pw_reset_option" id="pw_reset_option" class="bx--select-input">
+                <option value="customer_pw_reset" selected="selected">Customer Password Reset</option>
+            </select>
+        </div>
+
+        <div class="login-main" id="form-section">
+            <form id="reset-password-form" class="login-fields input-centered" method="POST" action="#" novalidate>
+
+                <input type="hidden" name="usernameOrEmail" id="usernameOrEmail" value="" />
+
+                <!-- Customer LoginID (email) -->
+                <label class="label" for="login_id">Customer LoginID (email)</label>
+                <div class="bx--text-input__field-wrapper" style="margin-bottom: 1.5rem;">
+                    <input type="text" id="login_id" name="login_id" placeholder="Customer LoginID (email)" required autofocus />
+                </div>
+
+
+                <!-- Password fields -->
+                <div class="password-group">
+                    <label class="label" for="pwd">New Password</label>
+                    <div class="bx--text-input__field-wrapper" style="margin-bottom: 1rem;">
+                        <input type="password" id="pwd" name="pwd" placeholder="Enter new password" required autocomplete="new-password" />
+                    </div>
+
+                    <label class="label" for="confirm_pwd">Confirm Password</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input type="password" id="confirm_pwd" name="confirm_pwd" placeholder="Confirm new password" required autocomplete="new-password" />
+                    </div>
+
+                    <input type="hidden" name="newPassword" id="newPassword" value="" />
+
+                    <div id="passwordError" class="error-message">Passwords do not match or are empty.</div>
+                </div>
+
+                <!-- Submit button -->
+                <button type="submit" id="reset-button" class="button button-1 ease-in-anim-fast login" cs-attach="submitButton">
+                    Reset Password
+                </button>
+
+                <!-- Static password requirements (hidden by default) -->
+                <div id="password-requirements-static" hidden>
+                    <strong>Passwords must include the following:</strong>
+                    <ul class="policy-box ul-plain">
+                        <li>8 or more characters</li>
+                        <li>No spaces</li>
+                        <li>1 letter</li>
+                        <li>1 number</li>
+                        <li>1 symbol (# ? ! @ $ % &amp; * _ + - = &lt; &gt;)</li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success result (shown after successful reset, 204 from PATCH) -->
+        <div id="result-success" class="result-success-box">
+            <h2 style="margin-top: 0;">Password reset complete</h2>
+            <p>The password has been reset successfully for this user.</p>
+        </div>
+        <div id="result-success-actions" class="result-success-actions">
+            <button type="button" id="btn-another-user" class="btn btn-primary">Another User</button>
+            <button type="button" id="btn-exit" class="btn btn-secondary">Exit</button>
+        </div>
+
+        <!-- Error result (custom_page5-style) -->
+        <div id="result-error" class="result-error-box cs-all-error">
+            <div class="content">
+                <div class="error-header spaced">Error</div>
+                <div id="result-error-message" class="error-message spaced"></div>
+                <div id="result-error-details" class="error-details spaced" style="display: none;"></div>
+            </div>
+        </div>
+
+        @PAGE_FOOTER@
+    </div>
+
+    <script type="text/javascript" src="/profile/static/carbon-components.min.js"></script>
+    <script type="text/javascript" src="/usc/js/ieCheck.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('reset-password-form');
+            const formSection = document.getElementById('form-section');
+            const resultSuccess = document.getElementById('result-success');
+            const resultSuccessActions = document.getElementById('result-success-actions');
+            const resultError = document.getElementById('result-error');
+            const resultErrorMessage = document.getElementById('result-error-message');
+            const resultErrorDetails = document.getElementById('result-error-details');
+            if (!form) return;
+
+            const config = window.PW_RESET_CONFIG || {};
+            const baseUrl = 'https://' + (config.thirdPartyIdP || '').replace(/^https?:\/\//, '');
+
+            function showSuccess() {
+                resultError.classList.remove('show');
+                resultErrorMessage.textContent = '';
+                resultErrorDetails.style.display = 'none';
+                resultSuccess.classList.add('show');
+                if (resultSuccessActions) resultSuccessActions.classList.add('show');
+                if (formSection) formSection.style.display = 'none';
+            }
+
+            function showError(message, details, detailsAsHtml) {
+                resultSuccess.classList.remove('show');
+                if (resultSuccessActions) resultSuccessActions.classList.remove('show');
+                resultErrorMessage.textContent = message || 'An error occurred.';
+                if (detailsAsHtml) {
+                    resultErrorDetails.innerHTML = details;
+                } else {
+                    resultErrorDetails.textContent = details || '';
+                }
+                resultErrorDetails.style.display = (details || detailsAsHtml) ? 'block' : 'none';
+                resultError.classList.add('show');
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getPasswordPolicyRequirementsHtml() {
+                return '<div class="error-policy-block">' +
+                    '<strong>Passwords must include the following:</strong>' +
+                    '<ul class="error-policy-list">' +
+                    '<li>8 or more characters</li>' +
+                    '<li>No spaces</li>' +
+                    '<li>1 letter</li>' +
+                    '<li>1 number</li>' +
+                    '<li>1 symbol (# ? ! @ $ % &amp; * _ + - = &lt; &gt;)</li>' +
+                    '</ul>' +
+                    '</div>';
+            }
+
+            // 1. Populate password policy (null-safe in case elements are missing)
+            const policy = { minLength: '8', requireUppercase: 'true', requireLowercase: 'true', requireDigit: 'true', requireSpecial: 'true' };
+            const minLengthEl = document.getElementById('minLength');
+            const maxLengthEl = document.getElementById('maxLength');
+            if (minLengthEl) minLengthEl.textContent = policy.minLength;
+            if (maxLengthEl) maxLengthEl.textContent = '128';
+            ['reqUpper','reqLower','reqDigit','reqSpecial'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'list-item';
+            });
+
+            const passwordInput = document.getElementById('pwd');
+            const confirmInput = document.getElementById('confirm_pwd');
+            const errorDiv = document.getElementById('passwordError');
+            const submitBtn = document.getElementById('reset-button');
+
+            // Policy enforced before PATCH: must match displayed requirements
+            const PASSWORD_POLICY = {
+                minLength: 8,
+                maxLength: 128,
+                allowedSymbols: '#?!@$%&*_+-=<>'
+            };
+            function validatePasswordPolicy(password) {
+                if (!password || password.length < PASSWORD_POLICY.minLength) {
+                    return { valid: false, message: 'Password must be at least ' + PASSWORD_POLICY.minLength + ' characters.' };
+                }
+                if (password.length > PASSWORD_POLICY.maxLength) {
+                    return { valid: false, message: 'Password must be no more than ' + PASSWORD_POLICY.maxLength + ' characters.' };
+                }
+                if (/\s/.test(password)) {
+                    return { valid: false, message: 'Password must not contain spaces.' };
+                }
+                if (!/[a-zA-Z]/.test(password)) {
+                    return { valid: false, message: 'Password must contain at least one letter.' };
+                }
+                if (!/\d/.test(password)) {
+                    return { valid: false, message: 'Password must contain at least one number.' };
+                }
+                const symbolRe = new RegExp('[' + PASSWORD_POLICY.allowedSymbols.replace(/[\]\\^-]/g, '\\$&') + ']');
+                if (!symbolRe.test(password)) {
+                    return { valid: false, message: 'Password must contain at least one symbol (# ? ! @ $ % & * _ + - = < >).' };
+                }
+                return { valid: true, message: '' };
+            }
+
+            // Before button press (e.g. on input): only check if passwords match and both required
+            const validatePasswords = () => {
+                const pw1 = passwordInput.value.trim();
+                const pw2 = confirmInput.value.trim();
+                if (!pw1 || !pw2) {
+                    errorDiv.textContent = "Both password fields are required.";
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+                if (pw1 !== pw2) {
+                    errorDiv.textContent = "Passwords do not match.";
+                    errorDiv.style.display = 'block';
+                    return false;
+                }
+                errorDiv.style.display = 'none';
+                return true;
+            };
+            [passwordInput, confirmInput].forEach(input => input.addEventListener('input', validatePasswords));
+
+            // Perform reset flow (token -> Users lookup -> PATCH). Called from both form submit and button click.
+            async function performReset() {
+                resultError.classList.remove('show');
+                resultSuccess.classList.remove('show');
+
+                if (!validatePasswords()) return;
+
+                const newPassword = document.getElementById('pwd').value;
+                const policyResult = validatePasswordPolicy(newPassword);
+                if (!policyResult.valid) {
+                    showError(policyResult.message, getPasswordPolicyRequirementsHtml(), true);
+                    return;
+                }
+
+                const loginId = document.getElementById('login_id').value.trim();
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Resetting…';
+                }
+
+                try {
+                    // 1) Obtain bearer token
+                    const tokenUrl = baseUrl + '/oidc/endpoint/default/token';
+                    const tokenBody = new URLSearchParams({
+                        grant_type: 'client_credentials',
+                        client_id: config.adminApiClientId || '',
+                        client_secret: config.adminApiClientSecret || ''
+                    }).toString();
+                    const tokenRes = await fetch(tokenUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: tokenBody
+                    });
+                    const tokenJson = await tokenRes.json().catch(() => ({}));
+                    if (!tokenJson.access_token) {
+                        showError('Failed to obtain access token.', tokenJson.error_description || tokenJson.error || JSON.stringify(tokenJson));
+                        return;
+                    }
+                    const accessToken = tokenJson.access_token;
+
+                    // 2) GET Users by email filter (eq = exact match; value in double quotes)
+                    const usersUrl = baseUrl + '/v2.0/Users?filter=emails+ew+%22' + encodeURIComponent(loginId) + '%22';
+                    const usersRes = await fetch(usersUrl, {
+                        method: 'GET',
+                        // headers: { 'Authorization': 'Bearer ' + accessToken, 'Accept': 'application/json' }
+                        headers: { 'Authorization': 'Bearer ' + accessToken }
+                    });
+                    const usersJson = await usersRes.json().catch(() => ({}));
+                    const resources = usersJson.Resources || [];
+                    if (resources.length === 0) {
+                        showError('User not found.', 'No user found for login ID: ' + loginId);
+                        return;
+                    }
+                    const userId = resources[0].id;
+
+                    // 3) PATCH passwordResetter
+                    const patchUrl = baseUrl + '/v2.0/Users/' + encodeURIComponent(userId) + '/passwordResetter';
+                    const patchBody = JSON.stringify({
+                        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+                        operations: [{
+                            op: 'replace',
+                            value: {
+                                password: newPassword,
+                                'urn:ietf:params:scim:schemas:extension:ibm:2.0:Notification': {
+                                    notifyType: 'EMAIL',
+                                    notifyPassword: false
+                                }
+                            }
+                        }]
+                    });
+                    const patchRes = await fetch(patchUrl, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': 'Bearer ' + accessToken,
+                            'Content-Type': 'application/scim+json'
+                        },
+                        body: patchBody
+                    });
+
+                    if (patchRes.status === 204) {
+                        showSuccess();
+                    } else {
+                        const errText = await patchRes.text();
+                        let errMessage = 'Password reset failed.';
+                        let errDetail = 'Status: ' + patchRes.status;
+                        let apiErrorCode = '';
+                        let apiErrorMessage = '';
+                        try {
+                            const errJson = JSON.parse(errText);
+                            apiErrorCode = errJson.code || errJson.errorCode || '';
+                            apiErrorMessage = (errJson.detail || errJson.error || errJson.message || errJson.errorMessage || '').toString();
+                            errDetail += (apiErrorMessage ? '\n' + apiErrorMessage : '') || '\n' + errText;
+                        } catch (_) {
+                            if (errText) errDetail += '\n' + errText;
+                        }
+                        if (patchRes.status === 400 && (apiErrorCode === 'CSIAI0023E' || apiErrorMessage.indexOf('CSIAI0023E') !== -1 || apiErrorMessage.indexOf('Password does not meet minimum number of special characters') !== -1)) {
+                            errMessage = apiErrorMessage || errMessage;
+                            showError(errMessage, (errDetail ? '<p class="spaced">' + escapeHtml(errDetail) + '</p>' : '') + getPasswordPolicyRequirementsHtml(), true);
+                        } else {
+                            showError(errMessage, errDetail);
+                        }
+                    }
+                } catch (err) {
+                    showError('Request failed.', err.message || String(err));
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Reset Password';
+                    }
+                }
+            }
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                performReset();
+            }, true);
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    performReset();
+                }, true);
+            }
+
+            document.getElementById('btn-another-user').addEventListener('click', function() {
+                window.location.reload();
+            });
+            document.getElementById('btn-exit').addEventListener('click', function() {
+                window.close();
+                if (!window.closed) window.location.href = 'about:blank';
+            });
+        });
+    </script>
+
+</body>
+</html>
