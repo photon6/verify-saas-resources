@@ -48,13 +48,37 @@
         }
         .ul-plain { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; }
         .ul-plain li { margin-bottom: 0.25rem; }
+        /* Password policy div: visible on load, white bg, red font; items turn green when criterion met */
+        #password-requirements-static {
+            background: #fff;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        #password-requirements-static strong { color: #da1e28; text-align: left; }
+        #password-requirements-static .policy-criterion { color: #da1e28; text-align: left; }
+        #password-requirements-static .policy-criterion.met { color: #198038; }
+        #password-requirements-static ul.ul-plain { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; text-align: left; }
+        #password-requirements-static ul.ul-plain li { margin-bottom: 0.25rem; text-align: left; }
         #password-requirements-static ul.ul-plain li::before { content: "\2639\00a0"; }
+        .note-inline { margin: 1rem 0; color: #0f62fe; }
+        .note-inline .note-label { font-weight: bold; text-decoration: underline; }
+        /* Result table (success) */
+        .result-table-wrap { margin-top: 1rem; background: #fff; text-align: left; }
+        .result-table-wrap table { width: 100%; border-collapse: collapse; border: 1px solid #e0e0e0; background: #fff; }
+        .result-table-wrap th, .result-table-wrap td { border: 1px solid #e0e0e0; padding: 0.5rem 0.75rem; text-align: left; background: #fff; }
+        .result-table-wrap th { font-weight: 600; background: #f4f4f4; }
+        .result-table-wrap .value-success { color: #198038; background: #fff; }
+        .result-table-wrap .value-error { color: #da1e28; background: #fff; }
+        .result-note { margin-top: 1rem; color: #0f62fe; }
+        .result-note .note-label { font-weight: bold; text-decoration: underline; }
         /* Result panels (success / error) */
         #result-success, #result-error, #result-success-actions { display: none; margin-top: 1.5rem; }
         #result-success.show, #result-error.show, #result-success-actions.show { display: block; }
         #result-success-actions { margin-top: 0; padding-top: 1rem; }
         .result-success-box {
-            background: #defbe6;
+            background: #fff;
             border-left: 4px solid #198038;
             padding: 1rem 1.5rem;
             margin: 0;
@@ -100,15 +124,6 @@
 
         @PAGE_HEADER@
 
-        <h1>MyAccount Password Reset Application</h1>
-
-        <p>Please choose option and argument</p>
-        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <select name="pw_reset_option" id="pw_reset_option" class="bx--select-input">
-                <option value="customer_pw_reset" selected="selected">Customer Password Reset</option>
-            </select>
-        </div>
-
         <div class="login-main" id="form-section">
             <form id="reset-password-form" class="login-fields input-centered" method="POST" action="#" novalidate>
 
@@ -135,32 +150,40 @@
 
                     <input type="hidden" name="newPassword" id="newPassword" value="" />
 
-                    <div id="passwordError" class="error-message">Passwords do not match or are empty.</div>
+                    <div id="passwordError" class="error-message">Passwords do not match.</div>
                 </div>
 
-                <!-- Submit button -->
-                <button type="submit" id="reset-button" class="button button-1 ease-in-anim-fast login" cs-attach="submitButton">
-                    Reset Password
-                </button>
-
-                <!-- Static password requirements (hidden by default) -->
-                <div id="password-requirements-static" hidden>
+                <!-- Password policy: visible on load, white bg, red font; items turn green when met -->
+                <div id="password-requirements-static">
                     <strong>Passwords must include the following:</strong>
-                    <ul class="policy-box ul-plain">
-                        <li>8 or more characters</li>
-                        <li>No spaces</li>
-                        <li>1 letter</li>
-                        <li>1 number</li>
-                        <li>1 symbol (# ? ! @ $ % &amp; * _ + - = &lt; &gt;)</li>
+                    <ul class="ul-plain">
+                        <li id="req-minlen" class="policy-criterion">8 or more characters</li>
+                        <li id="req-nospaces" class="policy-criterion">No spaces</li>
+                        <li id="req-letter" class="policy-criterion">1 letter</li>
+                        <li id="req-number" class="policy-criterion">1 number</li>
+                        <li id="req-symbol" class="policy-criterion">1 symbol (# ? ! @ $ % &amp; * _ + - = &lt; &gt;)</li>
                     </ul>
                 </div>
+
+                <p class="note-inline"><span class="note-label">Note:</span> * Submitting this form will force the customer to change their password upon first login.</p>
+
+                <!-- Submit button: disabled until policy satisfied -->
+                <button type="submit" id="reset-button" class="button button-1 ease-in-anim-fast login" cs-attach="submitButton" disabled>
+                    Submit
+                </button>
             </form>
         </div>
 
-        <!-- Success result (shown after successful reset, 204 from PATCH) -->
-        <div id="result-success" class="result-success-box">
-            <h2 style="margin-top: 0;">Password reset complete</h2>
-            <p>The password has been reset successfully for this user.</p>
+        <!-- Success result: Result table (shown after 204 from PATCH) -->
+        <div id="result-success" class="result-success-box result-table-wrap">
+            <h2 style="margin-top: 0;">Result</h2>
+            <table>
+                <tr><th>UserID</th><td id="result-userid"></td></tr>
+                <tr><th>Password</th><td id="result-password"></td></tr>
+                <tr><th>Return Code</th><td id="result-code"></td></tr>
+                <tr><th>Description</th><td id="result-description"></td></tr>
+            </table>
+            <p class="result-note"><span class="note-label">Note:</span> *Customer will be forced to change their password upon first login.</p>
         </div>
         <div id="result-success-actions" class="result-success-actions">
             <button type="button" id="btn-another-user" class="btn btn-primary">Another User</button>
@@ -196,10 +219,21 @@
             const config = window.PW_RESET_CONFIG || {};
             const baseUrl = 'https://' + (config.thirdPartyIdP || '').replace(/^https?:\/\//, '');
 
-            function showSuccess() {
+            function showSuccess(loginId, newPassword, statusCode, description) {
                 resultError.classList.remove('show');
                 resultErrorMessage.textContent = '';
                 resultErrorDetails.style.display = 'none';
+                document.getElementById('result-userid').textContent = loginId || '';
+                document.getElementById('result-password').textContent = newPassword || '';
+                const code = statusCode != null ? statusCode : 200;
+                const desc = description != null ? description : 'Operation Succeeded';
+                const codeEl = document.getElementById('result-code');
+                const descEl = document.getElementById('result-description');
+                codeEl.textContent = String(code);
+                descEl.textContent = desc;
+                const is2xx = code >= 200 && code <= 299;
+                codeEl.className = is2xx ? 'value-success' : 'value-error';
+                descEl.className = is2xx ? 'value-success' : 'value-error';
                 resultSuccess.classList.add('show');
                 if (resultSuccessActions) resultSuccessActions.classList.add('show');
                 if (formSection) formSection.style.display = 'none';
@@ -283,24 +317,69 @@
                 return { valid: true, message: '' };
             }
 
-            // Before button press (e.g. on input): only check if passwords match and both required
+            // While typing: only show "Passwords do not match" when confirm has value and they don't match
+            function updateMatchMessage() {
+                const pw1 = passwordInput.value.trim();
+                const pw2 = confirmInput.value.trim();
+                if (pw2.length === 0) {
+                    errorDiv.style.display = 'none';
+                    return;
+                }
+                if (pw1 !== pw2) {
+                    errorDiv.textContent = 'Passwords do not match.';
+                    errorDiv.style.display = 'block';
+                } else {
+                    errorDiv.style.display = 'none';
+                }
+            }
+            // Full validation for submit (both required + match)
             const validatePasswords = () => {
                 const pw1 = passwordInput.value.trim();
                 const pw2 = confirmInput.value.trim();
                 if (!pw1 || !pw2) {
-                    errorDiv.textContent = "Both password fields are required.";
+                    errorDiv.textContent = 'Both password fields are required.';
                     errorDiv.style.display = 'block';
                     return false;
                 }
                 if (pw1 !== pw2) {
-                    errorDiv.textContent = "Passwords do not match.";
+                    errorDiv.textContent = 'Passwords do not match.';
                     errorDiv.style.display = 'block';
                     return false;
                 }
                 errorDiv.style.display = 'none';
                 return true;
             };
-            [passwordInput, confirmInput].forEach(input => input.addEventListener('input', validatePasswords));
+            confirmInput.addEventListener('input', function() {
+                updateMatchMessage();
+                updateSubmitButton();
+            });
+            passwordInput.addEventListener('input', function() {
+                updateMatchMessage();
+                updatePolicyCriteria();
+                updateSubmitButton();
+            });
+
+            // Update policy list items: red by default, green when criterion met
+            function updatePolicyCriteria() {
+                const pw = passwordInput.value;
+                const minLenEl = document.getElementById('req-minlen');
+                const noSpacesEl = document.getElementById('req-nospaces');
+                const letterEl = document.getElementById('req-letter');
+                const numberEl = document.getElementById('req-number');
+                const symbolRe = new RegExp('[' + PASSWORD_POLICY.allowedSymbols.replace(/[\]\\^-]/g, '\\$&') + ']');
+                if (minLenEl) { minLenEl.classList.toggle('met', pw.length >= PASSWORD_POLICY.minLength); }
+                if (noSpacesEl) { noSpacesEl.classList.toggle('met', !/\s/.test(pw)); }
+                if (letterEl) { letterEl.classList.toggle('met', /[a-zA-Z]/.test(pw)); }
+                if (numberEl) { numberEl.classList.toggle('met', /\d/.test(pw)); }
+                if (document.getElementById('req-symbol')) { document.getElementById('req-symbol').classList.toggle('met', symbolRe.test(pw)); }
+            }
+            function updateSubmitButton() {
+                const pw = passwordInput.value;
+                const policyResult = validatePasswordPolicy(pw);
+                if (submitBtn) submitBtn.disabled = !policyResult.valid;
+            }
+            updatePolicyCriteria();
+            updateSubmitButton();
 
             // Perform reset flow (token -> Users lookup -> PATCH). Called from both form submit and button click.
             async function performReset() {
@@ -382,7 +461,7 @@
                     });
 
                     if (patchRes.status === 204) {
-                        showSuccess();
+                        showSuccess(loginId, newPassword);
                     } else {
                         const errText = await patchRes.text();
                         let errMessage = 'Password reset failed.';
@@ -408,8 +487,8 @@
                     showError('Request failed.', err.message || String(err));
                 } finally {
                     if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Reset Password';
+                        submitBtn.disabled = !validatePasswordPolicy(document.getElementById('pwd').value).valid;
+                        submitBtn.textContent = 'Submit';
                     }
                 }
             }
